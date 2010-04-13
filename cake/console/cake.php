@@ -610,35 +610,23 @@ class ShellDispatcher {
 			foreach ($shells as $shell) {
 				if ($shell !== 'shell.php') {
 					$shell = str_replace('.php', '', $shell);
-					$shellList[$shell][$type] = $type;
+					$shellList[$type][] = $shell;
 				}
 			}
 		}
 		if ($shellList) {
 			ksort($shellList);
-			if (DS === '/') {
-				$width = exec('tput cols') - 2;
-			}
-			if (empty($width)) {
-				$width = 80;
-			}
-			$columns = max(1, floor($width / 30));
-			$rows = ceil(count($shellList) / $columns);
 
-			foreach ($shellList as $shell => $types) {
-				sort($types);
-				$shellList[$shell] = str_pad($shell . ' [' . implode ($types, ', ') . ']', $width / $columns);
-			}
-			$out = array_chunk($shellList, $rows);
-			for ($i = 0; $i < $rows; $i++) {
-				$row = '';
-				for ($j = 0; $j < $columns; $j++) {
-					if (!isset($out[$j][$i])) {
-						continue;
- 					}
-					$row .= $out[$j][$i];
- 				}
-				$this->stdout(" " . $row);
+			foreach ($shellList as $shellType => $shellNames) {
+
+				$this->stdout('[ '.$shellType." ]");
+
+				foreach($shellNames as $shellName) {
+					$this->stdout("\t\t".$shellName);
+				}
+
+				$this->stdout('');
+
 			}
 		}
 		$this->stdout("\nTo run a command, type 'cake shell_name [args]'");

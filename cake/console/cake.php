@@ -310,7 +310,7 @@ class ShellDispatcher {
 			$this->help();
 			return true;
 		}
-		
+
 		list($plugin, $shell) = pluginSplit($arg);
 		$this->shell = $shell;
 		$this->shellName = Inflector::camelize($shell);
@@ -617,17 +617,82 @@ class ShellDispatcher {
 		if ($shellList) {
 			ksort($shellList);
 
-			foreach ($shellList as $shellType => $shellNames) {
+			if ($this->params['col'] or true) {
+				$cols = 3;
+				$shellTypes = array_keys($shellList);
+				$out = array();
+				$continue = true;
+				$order = array();
+				$indexCurrentType = array();
+				$indexCurrentShell = array();
+				$maxShellType = 0;
+				while(true) {
+					for($col=0; $col<$cols; $col++){
+						if (!isset($indexCurrentType[$col])){
+							$indexCurrentType[$col] = $maxShellType;
+							$indexCurrentShell[$col] = 0;
 
-				$this->stdout('[ '.$shellType." ]");
+							$maxShellType++;
+						}
 
-				foreach($shellNames as $shellName) {
-					$this->stdout("\t\t".$shellName);
+						if (!empty($shellTypes[$indexCurrentType[$col]])) {
+							$nameCurrentType = $shellTypes[$indexCurrentType[$col]];
+							$nameCurrentShell = $shellList[$nameCurrentType][$indexCurrentShell[$col]];
+
+							$out_nameCurrentType = str_pad('[ '.$shellTypes[$indexCurrentType[$col]].' ]', 40);
+							$out_nameCurrentShell = str_pad('     '.$shellList[$nameCurrentType][$indexCurrentShell[$col]], 40);
+
+
+
+							if ((empty($shellName[$col]) || !$shellName[$col]) && $indexCurrentShell[$col] == 0){
+								echo $out_nameCurrentType;
+								$shellName[$col] = true;
+							}else{
+								echo $out_nameCurrentShell;
+								$indexCurrentShell[$col]++;
+							}
+
+
+						}
+
+						$end = true;
+						for($verifyEnd=0; $verifyEnd<$cols; $verifyEnd++){
+							@$end = $end && !empty($indexCurrentType[$verifyEnd]) && empty($shellList[$shellTypes[$indexCurrentType[$verifyEnd]]]);
+						}
+						if ($end){
+							break(2);
+						}
+
+						if (empty($shellTypes[$indexCurrentType[$col]])){
+							//echo "no existe el type col:$col\n";
+						}else{
+							$nameCurrentType = $shellTypes[$indexCurrentType[$col]];
+							if (empty($shellList[$nameCurrentType][$indexCurrentShell[$col]])) {
+								$maxShellType++;
+								$indexCurrentType[$col] = max($indexCurrentType[$col]++, $maxShellType);
+								$shellName[$col] = false;
+								$indexCurrentShell[$col] = 0;
+							}
+						}
+
+					}
+					echo "\n";
 				}
-
-				$this->stdout('');
-
 			}
+
+
+
+			// foreach ($shellList as $shellType => $shellNames) {
+
+				// $this->stdout('[ '.$shellType." ]");
+
+				// foreach($shellNames as $shellName) {
+					// $this->stdout("\t\t".$shellName);
+				// }
+
+				// $this->stdout('');
+
+			// }
 		}
 		$this->stdout("\nTo run a command, type 'cake shell_name [args]'");
 		$this->stdout("To get help on a specific command, type 'cake shell_name help'");

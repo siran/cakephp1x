@@ -310,7 +310,7 @@ class ShellDispatcher {
 			$this->help();
 			return true;
 		}
-		
+
 		list($plugin, $shell) = pluginSplit($arg);
 		$this->shell = $shell;
 		$this->shellName = Inflector::camelize($shell);
@@ -614,7 +614,22 @@ class ShellDispatcher {
 				}
 			}
 		}
-		if ($shellList) {
+
+		if ($shellList && !empty($this->params['t'])) {
+			foreach ($shellList as $shell => $type) {
+				$typeName = array_keys($type);
+				$shellListB[$typeName[0]][] = $shell;
+			}
+			$shellList = $shellListB;
+			ksort($shellList);
+			foreach ($shellList as $type => $shells) {
+				asort($shells);
+				echo '[ '.$type.' ]'."\n\t";
+				echo implode(', ', $shells);
+				echo "\n\n";
+			}
+			echo "\n";
+		} else if ($shellList) {
 			ksort($shellList);
 			if (DS === '/') {
 				$width = exec('tput cols') - 2;

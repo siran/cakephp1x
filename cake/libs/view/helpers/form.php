@@ -1482,6 +1482,10 @@ class FormHelper extends AppHelper {
 			$options = array_reverse($options, true);
 		}
 
+		if (!is_null($selected) && is_bool($selected)) {
+			$selected = (int)$selected;
+		}
+
 		$select = array_merge($select, $this->__selectOptions(
 			array_reverse($options, true),
 			$selected,
